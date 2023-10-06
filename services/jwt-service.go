@@ -9,7 +9,7 @@ import (
 )
 
 type JWTService interface {
-	GenrateToken(name string, admin bool) string
+	GenerateToken(name string, admin bool) string
 	ValidateToken(tokenString string) (*jwt.Token, error)
 }
 
@@ -40,7 +40,7 @@ func getSecretKey() string {
 	return secret
 }
 
-func (jwtSrv *jwtService) GenrateToken(username string, admin bool) string {
+func (jwtSrv *jwtService) GenerateToken(username string, admin bool) string {
 	claims := &jwtCustomClaims{
 		username,
 		admin,
