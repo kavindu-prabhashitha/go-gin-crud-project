@@ -16,6 +16,9 @@ import (
 var (
 	videoService    services.VideoService      = services.New()
 	VideoController controller.VideoController = controller.New(videoService)
+
+	loginService    services.LoginService      = services.NewLoginService()
+	loginController controller.LoginController = controller.NewLoginController(loginService)
 )
 
 func setupLogOutput() {
@@ -32,9 +35,21 @@ func main() {
 	server := gin.New()
 	server.Static("/css", "./templates/css")
 	server.LoadHTMLGlob("templates/*.html")
-	server.Use(gin.Recovery(), middlewares.Logger(), middlewares.BasicAuth())
+	server.Use(gin.Recovery(), middlewares.Logger())
 
-	apiRoutes := server.Group("/api")
+	// Login Endpoint : Authentication + Token Creation
+	server.POST("/login", func(ctx *gin.Context) {
+		token := loginController.Login(ctx)
+		if token != "" {
+			ctx.JSON(http.StatusOK, gin.H{
+				"token": token,
+			})
+		} else {
+			ctx.JSON(http.StatusUnauthorized, nil)
+		}
+	})
+
+	apiRoutes := server.Group("/api", middlewares.AuthorizeJWT(), middlewares.Logger())
 	{
 		apiRoutes.GET("/videos", func(ctx *gin.Context) {
 			ctx.JSON(200, VideoController.FindAll())
@@ -64,5 +79,10 @@ func main() {
 	// 	})
 	// })
 
-	server.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	server.Run(":" + port)
 }
