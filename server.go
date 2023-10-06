@@ -17,8 +17,9 @@ var (
 	videoService    services.VideoService      = services.New()
 	VideoController controller.VideoController = controller.New(videoService)
 
+	jwtService      services.JWTService        = services.NewJWTService()
 	loginService    services.LoginService      = services.NewLoginService()
-	loginController controller.LoginController = controller.NewLoginController(loginService)
+	loginController controller.LoginController = controller.NewLoginController(loginService, jwtService)
 )
 
 func setupLogOutput() {

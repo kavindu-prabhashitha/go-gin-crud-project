@@ -57,6 +57,7 @@ func (jwtSrv *jwtService) GenerateToken(username string, admin bool) string {
 	// Generate encoded token using the secret signing key
 	t, err := token.SignedString([]byte(jwtSrv.secretKey))
 	if err != nil {
+		fmt.Println("Error generating token jwt")
 		panic(err)
 	}
 

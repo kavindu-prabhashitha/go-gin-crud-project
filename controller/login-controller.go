@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
+	"github.com/kavindu-prabhashitha/go-gin-project-001/entity"
 	"github.com/kavindu-prabhashitha/go-gin-project-001/services"
 )
 
@@ -14,16 +17,26 @@ type loginController struct {
 	jwtService   services.JWTService
 }
 
-func NewLoginController(logService services.LoginService) LoginController {
+func NewLoginController(logService services.LoginService, jwtService services.JWTService) LoginController {
 	return &loginController{
 		loginService: logService,
+		jwtService:   jwtService,
 	}
 }
 
 func (controller *loginController) Login(ctx *gin.Context) string {
-	isAuthenticated := controller.loginService.Login("kavindu", "kp@123")
+	var reqUser entity.LoginUser
+
+	err := ctx.ShouldBindJSON(&reqUser)
+	fmt.Println(reqUser)
+	if err != nil {
+		return err.Error()
+	}
+	fmt.Println(reqUser)
+
+	isAuthenticated := controller.loginService.Login(reqUser.UserName, reqUser.Passowrd)
 	if isAuthenticated {
-		return controller.jwtService.GenerateToken("kavindu", true)
+		return controller.jwtService.GenerateToken(reqUser.UserName, true)
 	}
 	return ""
 }
